@@ -1,0 +1,13 @@
+#App Technical Specifications
+This app is being targeted and tested on the Wiki T10 Running Android 11
+
+##Relevant Specifications + Hardware
+GPS - Be able to locate where the user is on the map
+Gyroscope - Be able to indicate where abouts the phone is facing
+
+##Relveant APIs
+Firebase Authentication - Permits secure authentication for storing data non-locally
+
+##Wireframes 
+(find photos within wireframes folder)
+

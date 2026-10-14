@@ -1,0 +1,42 @@
+#App Name
+DundeeMapper
+
+#App Concept
+The purpose of this app is to be able to display a map of Dundee on your phone. Furthermore it will be able to show you where abouts you are within the city using GPS, alongside that it'll display street names too so you can figure out where you are.
+Alongside this the map will display locations within Dundee that may be worth visting, example, the V&A and be able to tell you a little bit about it.
+I have chosen this app as I have a knowledge of Dundee as an area and I am able to incorperate features that are mobile specific into the app (I.e GPS capabilities and a portable map). This will allow me to tick off many requirements for this project.
+
+##Features
+Viewable Map
+Login (Save progress on where you've visted/tick stuff off)
+GPS 
+
+##User Personas
+The primary demographic for this app would be tourists
+
+###User Persona 1
+Name - Greg Jones
+Age - 22
+Occupation - Tourist
+Background - Came over to Scotland on a holiday and unfortuentily ended up in Scumdee
+Goals - Wants to explore the city of Dundee as they are on holiday
+
+###User Persona 2
+Name - Lord Mckenzie
+Age - 30
+Occupation - Tesco Staff
+Background - Missed the last bus whilst working at Tesco
+Goals - Get home
+
+##Minimum Viable Product
+Feature		Essientail	Nice-to-have
+Map		Yes
+User Location	Yes
+3D Terrainn			Yes
+Pretty markers			Yes
+User Login	Yes
+User ticklist	Yes
+User Compares			Yes
+
+##Reflection
+Biggest challenge I face whilst coming up with the App Idea was me not knowing exactly what I wanted to do as I hatebeing creative

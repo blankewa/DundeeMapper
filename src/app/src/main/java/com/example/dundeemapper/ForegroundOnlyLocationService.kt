@@ -216,7 +216,50 @@ class ForegroundOnlyLocationService : Service() {
                 this, 0, launchActivityIntent, 0
             )
 
-            //RESUME FROM HERE
+            val notificationCompatBuilder
+                .setStyle(bigTextStyle)
+                .setContentTitle(titleText)
+                .setContentText(mainNotificationText)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setOngoing(true)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .addAction(
+                    R.drawable.ic_launch, getString(R.string.launch_activity)
+                    activityPendingIntent
+                )
+                .addAction(
+                    R.drawable.ic_cancel,
+                    getString(R.string.stop_location_updates_button_text),
+                    servicePendingIntent
+                )
+                .build()
+
+
+
+        }
+
+        inner class LocalBinder : Binder() {
+            internal val service: ForegroundOnlyLocationService
+                get() = this@ForegroundOnlyLocationService
+        }
+
+        companion object {
+            private const val TAG = "ForegroundOnlyLocationService"
+
+            private const val PACKAGE_NAME = "com.example.android.whileinuselocation"
+
+            internal const val ACTION_FOREGROUND_ONLY_LOCATION_BROADCAST =
+                "$PACKAGE_NAME.action.FOREGOUND_ONLY_LOCATION_BROADCAST"
+
+            internal const val EXTRA_LOCATION = "$PACKAGE_NAME.extra.LOCATION"
+
+            private const val EXTRA_CANCEL_LOCATION_TRACKING_FROM_NOTIFICATION =
+                "$PACKAGE_NAME.extra.CANCEL_LOCATION_TRACKING_FROM_NOTIFICATION"
+
+            private const val NOTIFICATION_ID = 12345678
+
+            private const val NOTIFICATION_CHANNEL_ID = "while_in_use_channel_01"
         }
 
 

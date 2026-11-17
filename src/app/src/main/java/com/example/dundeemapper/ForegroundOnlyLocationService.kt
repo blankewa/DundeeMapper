@@ -183,6 +183,41 @@ class ForegroundOnlyLocationService : Service() {
 
 
         //create big notif
+        private fun generateNotification(location: Location?): Notification {
+            Log.d(TAG, "generateNotification()")
+
+            //get varies
+            val mainNotifcationText = location?.toText() ?: getString(R.string.no_location_text)
+            val titleText = getString(R.string.app_name)
+
+            //add support to more andrioid (COME BACK TO)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.0) {
+                val notificationChannel = NotificationChannel(
+                    NOTIFICATION_CHANNEL_ID, titleText, NotificationManager.IMPORTANCE_DEFAULT
+                )
+
+                notificationManager.createNotificationChannel(notifcationChannel)
+            }
+
+            //create oofm
+            val bigTextStyle = NotificationCompat.BigTextStyle()
+                .bigText(mainNotifcationText)
+                .setBigContentTitle(titleText)
+
+            val launchActivityIntent = Intent(this, MainActivity::class.java)
+            val cancelIntent = Intent(this, ForegroundOnlyLocationService::class.java)
+            cancelIntent.putExtra(EXTRA_CANCEL_LOCATION_TRACKING_FROM_NOTIFCATION, true)
+
+            val servicePendingIntent = PendingIntent.getService(
+                this, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            )
+
+            val activityPendingIntent = PendingIntent.getActivity(
+                this, 0, launchActivityIntent, 0
+            )
+
+            //RESUME FROM HERE
+        }
 
 
     }

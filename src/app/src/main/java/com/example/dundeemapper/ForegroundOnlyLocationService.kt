@@ -11,6 +11,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.location.Location
 import android.location.LocationRequest
 import android.os.Binder
@@ -92,6 +93,97 @@ class ForegroundOnlyLocationService : Service() {
 
             return START_NOT_STICKY
             }
+
+        //this binds the service to allows foregound stuff
+        override fun onBind(intent: Intent): IBinder {
+            Log.d(TAG, "onBind()")
+
+            stopForeground(true)
+            serviceRunningInForeground = false
+            configureationChange = false
+            return localBinder
         }
+
+        //allows service to become background service again
+        override fun onRebind(intent: Intent) {
+            Log.d(TAG, "onRebind()")
+
+            stopForeground(true)
+            serviceRunningInForeground = false
+            configureationChange = false
+            super.onRebind(intent)
+        }
+
+        //
+        override fun onUnbind(intent: Intent): Boolean {
+            Log.d(TAG, "onUnbind()")
+
+            if (!configureationChange && SharedPreferenceUtil.getLocationTrackingPref(this)) {
+                Log.d(TAG, "starting foregound service...")
+                val noti = generateNotification(currentLocation)
+                startForeground(NOTIFICATION_ID, noti)
+                serviceRunningInForeground = true
+            }
+            return true
+        }
+
+        //destory
+        override fun onDestroy() {
+            Log.d(TAG, "onDestory()")
+        }
+
+        //change configs
+        override fun onConfigurationChanged(newConfig: Configuartion) {
+            super.onConfigurationChanged(newConfig)
+            configurationChange = true
+        }
+
+        fun subscribeToLocationUpdates() {
+            Log.d(TAG, "subscribeToLocationUpdates()")
+
+            SharedPreferenceUtil.saveLocationTrackingPref(this, true)
+
+            startService(Intent(applicationContext, ForegroundOnlyLocationService::class.java))
+
+            //error handling
+            try {
+                fusedLocationProviderClient.requestLocationUpdate(
+                    locationRequest, locationCallback, Looper.getMainLooper()
+                )
+            }
+            catch (badness: SecurityException) {
+                SharedPreferencesUtil.saveLocationTrackingPref(this, false)
+                Log.e(TAG, "location permission lost, unable ot remove updates, $badness")
+            }
+        }
+
+        fun unsubscribeToLocationUpdates() {
+            Log.d(TAG, "unsubscribeToLocationUpdates()")
+
+            try{
+                val removeTask = fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+                removeTask.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.d(TAG, "loc callback removed")
+                        stopSelf()
+                    }
+                    else {
+                        Log.d(TAG, "coudldnt remove callback")
+                    }
+                }
+                sharedPreferenceUtil.saveLocationTrackingPref(this, false)
+            }
+            catch (naughty: SecurityException) {
+                SharedPreferenceUtil.saveLocationTrackingPref(this, true)
+                Log.e(TAG, "permission gone, no updates removed, $naughty")
+            }
+        }
+
+
+
+
+        //create big notif
+
+
     }
 }

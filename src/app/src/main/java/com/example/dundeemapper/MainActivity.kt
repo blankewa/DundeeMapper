@@ -1,6 +1,9 @@
 package com.example.dundeemapper
 
 import android.os.Bundle
+//import androidx.appcompat.app.AppCompatActivity
+import android.widget.Button
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -30,10 +33,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+//////code for GPS related services////////
+
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Hello $name!",
+        text = "Hello $name",
         modifier = modifier
     )
 }

@@ -5,7 +5,11 @@ This app is being targeted and tested on the Wiki T10 Running Android 11
 GPS - Be able to locate where the user is on the map
 Gyroscope - Be able to indicate where abouts the phone is facing
 
+###GPS Implemtnation
+GPS that is being implemented is using FusedLocationProviderClient API provided by Google. The phone will be able to ask for permission to use location servives on the phone. (HAVE FLOWCHART PHOTO)
+
 ##Relveant APIs
+FusedLocationProviderClient - GPS API
 Firebase Authentication - Permits secure authentication for storing data non-locally
 
 ##Wireframes 

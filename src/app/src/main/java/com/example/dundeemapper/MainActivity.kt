@@ -72,7 +72,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             if (enabled) {
                 foregroundOnlyLocationService?.unsubscribeToLocationUpdates()
             } else {
-                // TODO: Step 1.0, Review Permissions: Checks and requests if needed.
                 if (foregroundPermissionApproved()) {
                     foregroundOnlyLocationService?.subscribeToLocationUpdates()
                         ?: Log.d(TAG, "Service Not Bound")
@@ -216,7 +215,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         outputTextView.text = outputWithPreviousLogs
     }
 
-
+    // TODO:REMEMBER THIS PART
     private inner class ForegroundOnlyBroadcastReceiver : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {

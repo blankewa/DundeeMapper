@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">DundeeMapper</string>
+    <string name="no_location_text">Waiting for location…</string>
+    <string name="stop_location_updates_button_text">stop location updates</string>
 </resources>

@@ -13,7 +13,7 @@ fun Location?.toText(): String {
 }
 
 internal object SharedPreferenceUtil {
-    private const val KEY_FOREGROUND_ENABLED = "tracking_foreground_location"
+    const val KEY_FOREGROUND_ENABLED = "tracking_foreground_location"
 
     fun getLocationTrackingPref(context: Context): Boolean {
         return context.getSharedPreferences(

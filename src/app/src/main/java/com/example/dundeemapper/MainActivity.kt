@@ -26,6 +26,7 @@ import com.google.android.material.snackbar.Snackbar
 
 private const val TAG = "MainActivity"
 private const val REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE = 34
+private const val MAX_LOG_LINES = 200
 
 class MainActivity : AppCompatActivity(),
     SharedPreferences.OnSharedPreferenceChangeListener {
@@ -256,7 +257,11 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun logResultsToScreen(output: String) {
+        // Newest line on top; keep only the most recent lines so the log can't grow forever.
         outputTextView.text = "$output\n${outputTextView.text}"
+            .lines()
+            .take(MAX_LOG_LINES)
+            .joinToString("\n")
     }
 
     private inner class ForegroundOnlyBroadcastReceiver : BroadcastReceiver() {
@@ -281,7 +286,8 @@ class MainActivity : AppCompatActivity(),
             }
 
             location?.let {
-                logResultsToScreen("Foreground location: ${it.toText()}")
+                val suffix = if (it.isInDundee()) "" else " - $NOT_IN_DUNDEE_TEXT"
+                logResultsToScreen("Foreground location: ${it.toText()}$suffix")
             }
         }
     }

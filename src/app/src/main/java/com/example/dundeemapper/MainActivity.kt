@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity(),
 
     private var foregroundOnlyLocationServiceBound = false
     private var foregroundOnlyLocationService: ForegroundOnlyLocationService? = null
+    private var pendingSubscribe = false
 
     private lateinit var foregroundOnlyBroadcastReceiver: ForegroundOnlyBroadcastReceiver
     private lateinit var sharedPreferences: SharedPreferences
@@ -43,6 +44,16 @@ class MainActivity : AppCompatActivity(),
             val binder = service as ForegroundOnlyLocationService.LocalBinder
             foregroundOnlyLocationService = binder.service
             foregroundOnlyLocationServiceBound = true
+
+            // Show whatever the service is doing right now (it may already be tracking).
+            logResultsToScreen("Status: ${binder.service.status.label}")
+
+            if (pendingSubscribe) {
+                pendingSubscribe = false
+                if (foregroundPermissionApproved()) {
+                    binder.service.subscribeToLocationUpdates()
+                }
+            }
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -74,8 +85,7 @@ class MainActivity : AppCompatActivity(),
             if (trackingEnabled) {
                 foregroundOnlyLocationService?.unsubscribeToLocationUpdates()
             } else if (foregroundPermissionApproved()) {
-                foregroundOnlyLocationService?.subscribeToLocationUpdates()
-                    ?: Log.d(TAG, "Service not bound")
+                subscribeWhenReady()
             } else {
                 requestForegroundPermissions()
             }
@@ -104,9 +114,10 @@ class MainActivity : AppCompatActivity(),
         super.onResume()
         LocalBroadcastManager.getInstance(this).registerReceiver(
             foregroundOnlyBroadcastReceiver,
-            IntentFilter(
-                ForegroundOnlyLocationService.ACTION_FOREGROUND_ONLY_LOCATION_BROADCAST
-            )
+            IntentFilter().apply {
+                addAction(ForegroundOnlyLocationService.ACTION_FOREGROUND_ONLY_LOCATION_BROADCAST)
+                addAction(ForegroundOnlyLocationService.ACTION_STATUS_BROADCAST)
+            }
         )
     }
 
@@ -140,6 +151,25 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    private fun subscribeWhenReady() {
+        val service = foregroundOnlyLocationService
+        if (service != null) {
+            service.subscribeToLocationUpdates()
+        } else {
+            Log.d(TAG, "Service not bound yet; will subscribe once connected")
+            pendingSubscribe = true
+        }
+    }
+
+    private fun requiredPermissions(): Array<String> {
+        val permissions = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Needed on Android 13+ for the tracking notification to be shown.
+            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        return permissions.toTypedArray()
+    }
+
     private fun foregroundPermissionApproved(): Boolean {
         return ContextCompat.checkSelfPermission(
             this,
@@ -161,7 +191,7 @@ class MainActivity : AppCompatActivity(),
                 .setAction(R.string.ok) {
                     ActivityCompat.requestPermissions(
                         this,
-                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        requiredPermissions(),
                         REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
                     )
                 }
@@ -169,7 +199,7 @@ class MainActivity : AppCompatActivity(),
         } else {
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                requiredPermissions(),
                 REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
             )
         }
@@ -185,13 +215,15 @@ class MainActivity : AppCompatActivity(),
 
         if (requestCode != REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE) return
 
+        val fineIndex = permissions.indexOf(Manifest.permission.ACCESS_FINE_LOCATION)
+
         when {
-            grantResults.isEmpty() -> {
+            grantResults.isEmpty() || fineIndex < 0 -> {
                 Log.d(TAG, "Permission request was cancelled.")
             }
 
-            grantResults[0] == PackageManager.PERMISSION_GRANTED -> {
-                foregroundOnlyLocationService?.subscribeToLocationUpdates()
+            grantResults[fineIndex] == PackageManager.PERMISSION_GRANTED -> {
+                subscribeWhenReady()
             }
 
             else -> {
@@ -229,6 +261,13 @@ class MainActivity : AppCompatActivity(),
 
     private inner class ForegroundOnlyBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == ForegroundOnlyLocationService.ACTION_STATUS_BROADCAST) {
+                val status = intent.getStringExtra(ForegroundOnlyLocationService.EXTRA_STATUS)
+                    ?.let { name -> runCatching { TrackingStatus.valueOf(name) }.getOrNull() }
+                status?.let { logResultsToScreen("Status: ${it.label}") }
+                return
+            }
+
             val location = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 intent.getParcelableExtra(
                     ForegroundOnlyLocationService.EXTRA_LOCATION,

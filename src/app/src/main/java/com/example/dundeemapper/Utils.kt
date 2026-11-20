@@ -4,6 +4,15 @@ import android.content.Context
 import android.location.Location
 import androidx.core.content.edit
 
+/** What the location service is currently doing. */
+enum class TrackingStatus(val label: String) {
+    STOPPED("Tracking stopped"),
+    SEARCHING("Searching for location…"),
+    ACTIVE("Location found"),
+    LOCATION_OFF("Location is turned off on this device"),
+    PERMISSION_MISSING("Location permission missing")
+}
+
 fun Location?.toText(): String {
     return if (this != null) {
         "($latitude, $longitude)"

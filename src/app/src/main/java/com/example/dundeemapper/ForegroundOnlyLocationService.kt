@@ -1,5 +1,4 @@
 //code for GPS service
-//code for GPS service
 
 package com.example.dundeemapper
 
@@ -364,12 +363,24 @@ class ForegroundOnlyLocationService : Service() {
 
     private fun generateNotification(location: Location?): Notification {
         // Only show coordinates while we actually have a live fix; otherwise say what's happening.
-        val notificationText =
-            if (status == TrackingStatus.ACTIVE && location != null) {
+        val hasFix = status == TrackingStatus.ACTIVE && location != null
+        val details =
+            if (hasFix) {
                 listOfNotNull(currentCity, location.toText()).joinToString(" · ")
             } else {
                 status.label
             }
+
+        // Collapsed notification: just the headline. Expanded: headline plus details.
+        val notificationText: String
+        val expandedText: String
+        if (hasFix && !location!!.isInDundee()) {
+            notificationText = NOT_IN_DUNDEE_TEXT
+            expandedText = "$NOT_IN_DUNDEE_TEXT\n$details"
+        } else {
+            notificationText = details
+            expandedText = details
+        }
         val titleText = getString(R.string.app_name)
 
         val launchActivityIntent = Intent(this, MainActivity::class.java)
@@ -393,7 +404,7 @@ class ForegroundOnlyLocationService : Service() {
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText(notificationText)
+                    .bigText(expandedText)
                     .setBigContentTitle(titleText)
             )
             .setContentTitle(titleText)
@@ -441,5 +452,3 @@ class ForegroundOnlyLocationService : Service() {
         private const val NOTIFICATION_CHANNEL_ID = "while_in_use_channel_01"
     }
 }
-
-
